@@ -24,13 +24,6 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 	myURL := parseURL(REDIRECT)
 	forwardHeaders(r, myURL)
 
-	//gets request's remote address without port number and sets it in forwarding header
-	split, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	r.Header.Set("X-Forwarded-For", split)
-
 	//makes the request to the actual server
 	response, err := http.DefaultClient.Do(r)
 	if err != nil {
@@ -63,4 +56,11 @@ func forwardHeaders(r *http.Request, url *url.URL) {
 	r.URL.Host = url.Host
 	r.URL.Scheme = url.Scheme
 	r.RequestURI = ""
+
+	//gets request's remote address without port number and sets it in forwarding header
+	split, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	r.Header.Set("X-Forwarded-For", split)
 }
