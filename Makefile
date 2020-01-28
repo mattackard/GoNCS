@@ -1,4 +1,7 @@
 include .env
 
-run: 
-	go run main.go
+proxy: 
+	go run ./cmd/reverseproxy/proxy.go
+
+tcpserver:
+	go run ./cmd/tcp/server.go
