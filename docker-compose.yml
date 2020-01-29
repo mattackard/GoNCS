@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  reverseproxy:
+    image: rproxy
+    build: 
+      context: ./cmd/reverseproxy/
+      dockerfile: Dockerfile
+    ports:
+      - 6060:6060
+    env_file: .env
+
+  noteserver:
+    image: noteserver
+    build:
+      context: ../project-0/cmd/GoNotesd/
+      dockerfile: Dockerfile
+    
