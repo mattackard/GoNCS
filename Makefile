@@ -7,6 +7,7 @@ tcpserver:
 	go run ./cmd/tcp/server.go
 
 all:
-	docker build -t rproxy ./cmd/reverseproxy/
-	docker build -t noteserver $GOPATH/src/github.com/mattackard/project-0/cmd/GoNotesd/
+	go build ../project-0/cmd/GoNotesClient/client.go 
+	./client &
 	docker-compose up
+	rm client

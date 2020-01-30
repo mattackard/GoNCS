@@ -1,3 +1,8 @@
+#environment variable files
 .env
 
+#docker compose debug file
 docker-compose.debug.yml
+
+#binaries being used to test with project-0
+client
