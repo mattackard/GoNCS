@@ -9,6 +9,14 @@ services:
     build:
       context: ../project-0/cmd/GoNotesd/
       dockerfile: Dockerfile
+    env_file: ../project-0/.env
+
+  logger:
+    image: logger
+    build:
+      context: ./cmd/logger/
+      dockerfile: Dockerfile
+    env_file: .env
 
   reverseproxy:
     image: rproxy

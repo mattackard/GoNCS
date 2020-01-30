@@ -5,6 +5,9 @@ proxy:
 tcpserver:
 	go run ./cmd/tcp/server.go
 
+logger:
+	go run ./cmd/logger/logger.go
+
 all:
 	go build ../project-0/cmd/GoNotesClient/client.go 
 	./client &

@@ -8,33 +8,36 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+
+	"github.com/mattackard/project-1/cmd/logger"
 )
 
-//PORT holds the port number that the reverse proxy will be deployed to
-var port = os.Getenv("PROXYPORT")
+//PORT holds the port number services that communicate with the proxy
+var proxyPort = os.Getenv("PROXYPORT")
+var logPort = os.Getenv("LOGPORT")
+var logName = os.Getenv("LOGGERNAME")
+var serverPort = os.Getenv("SERVERPORT")
+var serverName = os.Getenv("SERVERNAME")
+var loggerAddr = logName + ":" + logPort
+var serverAddr = "http://" + serverName + ":" + serverPort
 
-//redirect holds a string containing the url for the proxy to redirect to
-var redirect = "http://noteserver:5555"
-
-//holds the username used to identify requests from the proxy
-var httpUser = os.Getenv("USERNAME")
-
-//holds the password used to identify requests from the proxy
-var httpPass = os.Getenv("USERNAME")
+//holds the user and pass used to identify requests from the proxy
+var proxyAuth = os.Getenv("PROXYAUTH")
 
 func main() {
 	http.HandleFunc("/", redirectHandler)
-	log.Fatalln(http.ListenAndServe(port, nil))
+	log.Fatalln(http.ListenAndServe(proxyPort, nil))
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	myURL := parseURL(redirect)
+	logger.LogServerRequest(w, r, loggerAddr)
+	myURL := parseURL(serverAddr)
 	forwardHeaders(r, myURL)
 
 	//makes the request to the actual server
 	response, err := http.DefaultClient.Do(r)
 	if err != nil {
-		log.Fatal(err, "line 30")
+		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 35"})
 	}
 
 	//adds all response headers from server to response object being sent back to client
@@ -53,7 +56,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 func parseURL(target string) *url.URL {
 	parsed, err := url.Parse(target)
 	if err != nil {
-		log.Fatal(err, "line 49")
+		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 54"})
 	}
 	return parsed
 }
@@ -67,11 +70,11 @@ func forwardHeaders(r *http.Request, url *url.URL) {
 	//gets request's remote address without port number and sets it in forwarding header
 	split, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		log.Fatal(err, "line 63")
+		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 68"})
 	}
 	r.Header.Set("X-Forwarded-For", split)
 
 	//add user and pass for authenticating with the main server
-	auth := base64.StdEncoding.EncodeToString([]byte(os.Getenv("PROXYAUTH")))
+	auth := base64.StdEncoding.EncodeToString([]byte(proxyAuth))
 	r.Header.Set("Proxy-Authorization", "Basic "+auth)
 }
