@@ -4,7 +4,7 @@ FROM golang:alpine AS builder
 RUN mkdir /app 
 ADD . /app
 WORKDIR /app
-RUN go build -o proxy ./cmd/reverseproxy/proxy.go
+RUN go build -o proxy ./proxy.go
 
 
 FROM alpine:latest AS production

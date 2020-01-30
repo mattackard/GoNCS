@@ -1,6 +1,15 @@
 version: '3.7'
 
 services:
+
+  # noteserver goes first because if client tries to ping 
+  # reverse proxy and note server isn't running the proxy will crash
+  noteserver:
+    image: gonotesd
+    build:
+      context: ../project-0/cmd/GoNotesd/
+      dockerfile: Dockerfile
+
   reverseproxy:
     image: rproxy
     build: 
@@ -9,10 +18,3 @@ services:
     ports:
       - 6060:6060
     env_file: .env
-
-  noteserver:
-    image: gonotesd
-    build:
-      context: ../project-0/cmd/GoNotesd/
-      dockerfile: Dockerfile
-    

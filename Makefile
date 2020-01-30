@@ -1,4 +1,3 @@
-include .env
 
 proxy: 
 	go run ./cmd/reverseproxy/proxy.go
@@ -9,5 +8,5 @@ tcpserver:
 all:
 	go build ../project-0/cmd/GoNotesClient/client.go 
 	./client &
-	docker-compose up
+	docker-compose up --build
 	rm client
