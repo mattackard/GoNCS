@@ -30,14 +30,14 @@ func main() {
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	logger.LogServerRequest(w, r, loggerAddr)
+	logger.LogServerRequest(w, r, loggerAddr, nil)
 	myURL := parseURL(serverAddr)
 	forwardHeaders(r, myURL)
 
 	//makes the request to the actual server
 	response, err := http.DefaultClient.Do(r)
 	if err != nil {
-		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 35"})
+		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 35"}, nil)
 	}
 
 	//adds all response headers from server to response object being sent back to client
@@ -56,7 +56,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 func parseURL(target string) *url.URL {
 	parsed, err := url.Parse(target)
 	if err != nil {
-		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 54"})
+		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 54"}, nil)
 	}
 	return parsed
 }
@@ -70,7 +70,7 @@ func forwardHeaders(r *http.Request, url *url.URL) {
 	//gets request's remote address without port number and sets it in forwarding header
 	split, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 68"})
+		logger.SendLog(loggerAddr, true, []string{err.Error(), "line 68"}, nil)
 	}
 	r.Header.Set("X-Forwarded-For", split)
 
