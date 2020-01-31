@@ -5,17 +5,21 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 )
 
 //SendLog send the log message over tcp and throws an error if the log message is an error
-func SendLog(address string, isErr bool, data []string) {
+func SendLog(address string, isErr bool, data []string, logFile *os.File) {
 	conn, err := net.Dial("tcp", address)
 	defer conn.Close()
 	if err != nil {
 		log.Fatalln(err)
 	}
 	for _, v := range data {
-		conn.Write([]byte(v + "\n"))
+		conn.Write([]byte(v))
+		if logFile != nil {
+			logFile.WriteString(v)
+		}
 	}
 	if isErr {
 		log.Fatalln(data)
@@ -23,7 +27,8 @@ func SendLog(address string, isErr bool, data []string) {
 }
 
 //LogServerRequest creates a summary of the http connection information and send it to the connected logger
-func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string) {
+//if a logfile is provided it will also write the log messages to a log file
+func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string, logFile *os.File) {
 	method := r.Method
 	url := r.URL
 	httpVer := r.Proto
@@ -31,11 +36,21 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string)
 	closeConn := r.Close
 	address := r.RemoteAddr
 	reqData := fmt.Sprintf("%s %s %s %s %t %s", method, url, httpVer, host, closeConn, address)
-	SendLog(loggerAddr, false, []string{reqData})
+	SendLog(loggerAddr, false, []string{reqData}, logFile)
+}
+
+//WriteToLog writes the data passed into data to the given file
+func WriteToLog(data []string, file *os.File) {
+	for _, v := range data {
+		_, err := file.Write([]byte(v))
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 }
 
 //CreateLogServerAndListen runs a tcp server at address:port
-func CreateLogServerAndListen(address string) {
+func CreateLogServerAndListen(address string, logFile *os.File) {
 	l, err := net.Listen("tcp", address)
 	log.Printf("Logger is listening at %s\n", address)
 	if err != nil {
@@ -51,7 +66,8 @@ func CreateLogServerAndListen(address string) {
 		}
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
-		fmt.Println(string(buffer))
+		fmt.Print(string(buffer))
+		WriteToLog([]string{string(buffer)}, logFile)
 		go func(c net.Conn) {
 			c.Write(buffer)
 			c.Close()

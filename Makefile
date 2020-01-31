@@ -11,5 +11,6 @@ logger:
 all:
 	go build ../project-0/cmd/GoNotesClient/client.go 
 	./client &
-	docker-compose up --build
+	docker-compose build $(flag)
+	docker-compose up
 	rm client

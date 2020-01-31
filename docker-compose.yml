@@ -13,6 +13,8 @@ services:
 
   logger:
     image: logger
+    volumes: 
+      - /home/ubuntu/Desktop/logs:/logs
     build:
       context: ./cmd/logger/
       dockerfile: Dockerfile
@@ -26,3 +28,6 @@ services:
     ports:
       - 6060:6060
     env_file: .env
+    depends_on: 
+      - logger
+      - noteserver
