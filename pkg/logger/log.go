@@ -15,7 +15,7 @@ func SendLog(address string, isErr bool, data []string) {
 		log.Fatalln(err)
 	}
 	for _, v := range data {
-		conn.Write([]byte(v))
+		conn.Write([]byte(v + "\n"))
 	}
 	if isErr {
 		log.Fatalln(data)
@@ -30,7 +30,7 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string)
 	host := r.Host
 	closeConn := r.Close
 	address := r.RemoteAddr
-	reqData := fmt.Sprint(method, url, httpVer, host, closeConn, address)
+	reqData := fmt.Sprintf("%s %s %s %s %t %s", method, url, httpVer, host, closeConn, address)
 	SendLog(loggerAddr, false, []string{reqData})
 }
 

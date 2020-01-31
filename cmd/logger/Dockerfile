@@ -10,6 +10,6 @@ RUN go build -o logger ./log-server.go
 
 
 FROM alpine:latest AS production
-COPY --from=builder /app/logger .
+COPY --from=builder /app .
 EXPOSE 6061
 CMD [ "./logger" ]

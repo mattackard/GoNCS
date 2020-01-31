@@ -26,7 +26,7 @@ var proxyAuth = os.Getenv("PROXYAUTH")
 
 func main() {
 	http.HandleFunc("/", redirectHandler)
-	log.Fatalln(http.ListenAndServe(proxyPort, nil))
+	log.Fatalln(http.ListenAndServe(":"+proxyPort, nil))
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
