@@ -8,7 +8,8 @@ import (
 
 var logPort = os.Getenv("LOGPORT")
 var logAddress = os.Getenv("LOGGERNAME")
+var fullAddress = logAddress + ":" + logPort
 
 func main() {
-	logger.CreateLogServerAndListen(logAddress, logPort)
+	logger.CreateLogServerAndListen(fullAddress)
 }

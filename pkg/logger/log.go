@@ -35,9 +35,9 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string)
 }
 
 //CreateLogServerAndListen runs a tcp server at address:port
-func CreateLogServerAndListen(address string, port string) {
-	l, err := net.Listen("tcp", address+": "+port)
-	log.Printf("Logger is listening on port %s\n", port)
+func CreateLogServerAndListen(address string) {
+	l, err := net.Listen("tcp", address)
+	log.Printf("Logger is listening at %s\n", address)
 	if err != nil {
 		log.Fatal(err)
 	}
