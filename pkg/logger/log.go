@@ -19,7 +19,7 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File, id str
 	for _, v := range data {
 		conn.Write([]byte(v))
 		if logFile != nil {
-			logFile.WriteString(id + v)
+			logFile.Write([]byte(id + v))
 		}
 	}
 	if isErr {
@@ -35,7 +35,7 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string,
 	httpVer := r.Proto
 	host := r.Host
 	address := r.RemoteAddr
-	reqData := fmt.Sprintf("%s %s %s %s %s %s", address, time.Now(), method, url, httpVer, host)
+	reqData := fmt.Sprintf("%s [%s] %s %s %s %s", address, time.Now().Format("Jan 2 2006 15:04:05 MST"), method, url, httpVer, host)
 	SendLog(loggerAddr, false, []string{reqData}, logFile, id)
 }
 
