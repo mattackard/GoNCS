@@ -66,7 +66,7 @@ func CreateLogServerAndListen(address string, logFile *os.File) {
 		}
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
-		bufferText := string(buffer)
+		bufferText := string(buffer) + "\n"
 		fmt.Print(bufferText)
 		WriteToLog([]string{bufferText}, logFile)
 		go func(c net.Conn) {

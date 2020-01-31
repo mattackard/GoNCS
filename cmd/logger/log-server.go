@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/mattackard/project-1/pkg/logger"
+	//"github.com/mattackard/project-1/pkg/logger"
 )
 
 var logPort = os.Getenv("LOGPORT")
@@ -16,6 +17,5 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	logFile.Write([]byte("Hello World"))
 	logger.CreateLogServerAndListen(fullAddress, logFile)
 }
