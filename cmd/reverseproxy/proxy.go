@@ -9,7 +9,7 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/mattackard/project-1/cmd/logger"
+	"github.com/mattackard/project-1/pkg/logger"
 )
 
 //PORT holds the port number services that communicate with the proxy
