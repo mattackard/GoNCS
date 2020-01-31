@@ -6,6 +6,8 @@ services:
   # reverse proxy and note server isn't running the proxy will crash
   noteserver:
     image: gonotesd
+    volumes: 
+      - /home/ubuntu/Desktop/notes:/notes
     build:
       context: ../project-0/cmd/GoNotesd/
       dockerfile: Dockerfile

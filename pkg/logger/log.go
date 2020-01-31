@@ -6,10 +6,11 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"time"
 )
 
 //SendLog send the log message over tcp and throws an error if the log message is an error
-func SendLog(address string, isErr bool, data []string, logFile *os.File) {
+func SendLog(address string, isErr bool, data []string, logFile *os.File, id string) {
 	conn, err := net.Dial("tcp", address)
 	defer conn.Close()
 	if err != nil {
@@ -18,7 +19,7 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File) {
 	for _, v := range data {
 		conn.Write([]byte(v))
 		if logFile != nil {
-			logFile.WriteString(v)
+			logFile.WriteString(id + v)
 		}
 	}
 	if isErr {
@@ -28,15 +29,14 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File) {
 
 //LogServerRequest creates a summary of the http connection information and send it to the connected logger
 //if a logfile is provided it will also write the log messages to a log file
-func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string, logFile *os.File) {
+func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string, logFile *os.File, id string) {
 	method := r.Method
 	url := r.URL
 	httpVer := r.Proto
 	host := r.Host
-	closeConn := r.Close
 	address := r.RemoteAddr
-	reqData := fmt.Sprintf("%s %s %s %s %t %s", method, url, httpVer, host, closeConn, address)
-	SendLog(loggerAddr, false, []string{reqData}, logFile)
+	reqData := fmt.Sprintf("%s %s %s %s %s %s", address, time.Now(), method, url, httpVer, host)
+	SendLog(loggerAddr, false, []string{reqData}, logFile, id)
 }
 
 //WriteToLog writes the data passed into data to the given file
