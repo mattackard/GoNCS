@@ -1,4 +1,4 @@
-package logger
+package logutil
 
 import (
 	"fmt"
@@ -17,9 +17,9 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File, id str
 		log.Fatalln(err)
 	}
 	for _, v := range data {
-		conn.Write([]byte(v))
+		conn.Write([]byte(id + " " + v))
 		if logFile != nil {
-			logFile.Write([]byte(id + v))
+			logFile.WriteString(id + " " + v)
 		}
 	}
 	if isErr {
@@ -74,4 +74,17 @@ func CreateLogServerAndListen(address string, logFile *os.File) {
 			c.Close()
 		}(conn)
 	}
+}
+
+//OpenLogFile opens the log file stored in path
+//If the file doesn't exist it is created
+func OpenLogFile(path string) *os.File {
+	date := time.Now().Format("2006-01-02")
+	filename := fmt.Sprintf("%s/%s.txt", path, date)
+	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0666)
+	defer logFile.Close()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return logFile
 }

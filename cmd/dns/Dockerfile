@@ -6,10 +6,10 @@ ADD . /app
 WORKDIR /app
 RUN apk add --no-cache git
 RUN go get -d
-RUN go build -o logger ./logger.go
+RUN go build -o dns ./dns.go
 
 
 FROM alpine:latest AS production
 COPY --from=builder /app .
 EXPOSE 6060
-CMD [ "./logger" ]
+CMD [ "./dns" ]

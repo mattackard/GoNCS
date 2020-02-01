@@ -2,28 +2,43 @@ version: '3.7'
 
 services:
 
-  # noteserver goes first because if client tries to ping 
-  # reverse proxy and note server isn't running the proxy will crash
-  noteserver:
-    image: gonotesd
+  dns:
+    image: dns
     volumes: 
-      - /home/ubuntu/Desktop/notes:/notes
+      - /home/ubuntu/Desktop/logs/dns:/logs
     build:
-      context: ../project-0/cmd/GoNotesd/
+      context: ./cmd/dns/
       dockerfile: Dockerfile
-    env_file: ../project-0/.env
+    env_file: .env
 
   logger:
     image: logger
     volumes: 
-      - /home/ubuntu/Desktop/logs:/logs
+      - /home/ubuntu/Desktop/logs/logger:/logs
     build:
       context: ./cmd/logger/
       dockerfile: Dockerfile
     env_file: .env
+    depends_on: 
+      - dns
+
+  noteserver:
+    image: gonotesd
+    volumes: 
+      - /home/ubuntu/Desktop/notes:/notes
+      - /home/ubuntu/Desktop/logs/server:/logs
+    build:
+      context: ../project-0/cmd/GoNotesd/
+      dockerfile: Dockerfile
+    env_file: ../project-0/.env
+    depends_on: 
+      - dns
+      - logger
 
   reverseproxy:
     image: rproxy
+    volumes: 
+      - /home/ubuntu/Desktop/logs/reverseproxy:/logs
     build: 
       context: ./cmd/reverseproxy/
       dockerfile: Dockerfile
@@ -31,5 +46,6 @@ services:
       - 6060:6060
     env_file: .env
     depends_on: 
+      - dns
       - logger
       - noteserver
