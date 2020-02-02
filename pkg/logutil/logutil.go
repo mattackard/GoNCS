@@ -83,7 +83,7 @@ func CreateLogServerAndListen(address string, logFile *os.File) {
 func OpenLogFile(path string) *os.File {
 	date := time.Now().Format("2006-01-02")
 	filename := fmt.Sprintf("%s/%s.txt", path, date)
-	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0666)
+	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalln(err)
 	}
