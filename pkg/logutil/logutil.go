@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -52,12 +53,17 @@ func WriteToLog(data []string, file *os.File) {
 }
 
 //CreateLogServerAndListen runs a tcp server at address:port
-func CreateLogServerAndListen(address string, logFile *os.File) {
-	l, err := net.Listen("tcp", address)
-	log.Printf("Logger is listening at %s\n", address)
+func CreateLogServerAndListen(address string, port string, logFile *os.File) {
+	//make sure the port number is in the format ":####"
+	if !strings.ContainsAny(port, ":") {
+		port = ":" + port
+	}
+	l, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Printf("Logger is listening at %s\n", address)
 	defer l.Close()
 
 	//wait for a connection
@@ -68,9 +74,12 @@ func CreateLogServerAndListen(address string, logFile *os.File) {
 		}
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
+
+		//write the contents of buffer to the log file
 		bufferText := string(buffer) + "\n"
 		fmt.Print(bufferText)
 		WriteToLog([]string{bufferText}, logFile)
+
 		go func(c net.Conn) {
 			c.Write(buffer)
 			c.Close()
@@ -81,8 +90,13 @@ func CreateLogServerAndListen(address string, logFile *os.File) {
 //OpenLogFile opens the log file stored in path.
 //If the file doesn't exist it is created
 func OpenLogFile(path string) *os.File {
+	//if path does not end in a slash, add it
+	if !strings.HasSuffix(path, "/") {
+		path += "/"
+	}
 	date := time.Now().Format("2006-01-02")
-	filename := fmt.Sprintf("%s/%s.txt", path, date)
+	filename := fmt.Sprintf("%s%s.txt", path, date)
+	//opens file with options to append string on write, and open in write only mode
 	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatalln(err)
