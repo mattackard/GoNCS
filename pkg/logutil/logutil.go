@@ -22,7 +22,7 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File, id str
 		logString := fmt.Sprintf("%s [%s] %s", id, time.Now().Format("Jan 2 2006 15:04:05 MST"), v)
 		conn.Write([]byte(logString))
 		if logFile != nil {
-			logFile.WriteString(logString)
+			WriteToLog([]string{logString}, logFile)
 		}
 	}
 	if isErr {
@@ -45,6 +45,9 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string,
 //WriteToLog writes the data passed into data to the given file
 func WriteToLog(data []string, file *os.File) {
 	for _, v := range data {
+		//prepare string for writing to file
+		v = strings.ToValidUTF8(v, "")
+
 		_, err := file.Write([]byte(v))
 		if err != nil {
 			log.Fatalln(err)

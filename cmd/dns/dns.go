@@ -22,7 +22,7 @@ func main() {
 
 	logFile := logutil.OpenLogFile("./logs/")
 	defer logFile.Close()
-	l, err := net.Listen("tcp", dnsPort)
+	l, err := net.Listen("tcp", ":"+dnsPort)
 	log.Printf("DNS is listening at %s\n", dnsPort)
 	if err != nil {
 		logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "DNS")
