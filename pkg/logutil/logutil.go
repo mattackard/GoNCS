@@ -14,13 +14,15 @@ import (
 //SendLog sends the log message over tcp and throws an error if the log message is an error.
 //If a log file is given it will write the data to the log file
 func SendLog(address string, isErr bool, data []string, logFile *os.File, id string) {
-	conn, err := net.Dial("tcp", address)
-	if conn != nil {
-		defer conn.Close()
+	var conn net.Conn
+	var err error
+	for {
+		conn, err = net.Dial("tcp", address)
+		if err == nil {
+			break
+		}
 	}
-	if err != nil {
-		log.Fatalln(err)
-	}
+	defer conn.Close()
 
 	for _, v := range data {
 		logString := fmt.Sprintf("%s [%s] %s", id, time.Now().Format("Jan 2 2006 15:04:05 MST"), v)

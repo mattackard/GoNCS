@@ -8,13 +8,15 @@ import (
 
 //Ping send a ping to the DNS so it can record your service and IP
 func Ping(address string, serviceName string) net.Addr {
-	conn, err := net.Dial("tcp", address)
-	if conn != nil {
-		defer conn.Close()
+	var conn net.Conn
+	var err error
+	for {
+		conn, err = net.Dial("tcp", address)
+		if err == nil {
+			break
+		}
 	}
-	if err != nil {
-		log.Fatalln(err)
-	}
+	defer conn.Close()
 	fmt.Fprintf(conn, serviceName)
 	ip := conn.LocalAddr()
 	return ip
