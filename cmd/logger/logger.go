@@ -18,7 +18,7 @@ func main() {
 
 	//send messages to log file and dns to record startup
 	loggerIP := dnsutil.Ping(dnsName+":"+dnsPort, "logger")
-	logutil.WriteToLog(logFile, []string{"Reverse Proxy Server started at " + loggerIP})
+	logutil.WriteToLog(logFile, []string{"Reverse Proxy Server started at " + loggerIP.String()})
 
 	logutil.CreateLogServerAndListen(logAddress, logPort, logFile)
 }

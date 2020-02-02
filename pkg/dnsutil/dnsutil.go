@@ -14,7 +14,8 @@ func Ping(address string, serviceName string) net.Addr {
 		log.Fatalln(err)
 	}
 	fmt.Fprintf(conn, serviceName)
-	return conn.LocalAddr()
+	ip := conn.LocalAddr()
+	return ip
 }
 
 //GetMyIP returns the caller's ip address by sending a blank request to google's DNS server
@@ -25,5 +26,6 @@ func GetMyIP() net.Addr {
 		log.Fatalln(err)
 	}
 	defer conn.Close()
-	return conn.LocalAddr()
+	ip := conn.LocalAddr()
+	return ip
 }
