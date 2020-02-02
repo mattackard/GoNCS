@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-//SendLog send the log message over tcp and throws an error if the log message is an error
+//SendLog sends the log message over tcp and throws an error if the log message is an error.
+//If a log file is given it will write the data to the log file
 func SendLog(address string, isErr bool, data []string, logFile *os.File, id string) {
 	conn, err := net.Dial("tcp", address)
 	defer conn.Close()
@@ -17,9 +18,10 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File, id str
 		log.Fatalln(err)
 	}
 	for _, v := range data {
-		conn.Write([]byte(id + " " + v))
+		logString := fmt.Sprintf("%s [%s] %s", id, time.Now().Format("Jan 2 2006 15:04:05 MST"), v)
+		conn.Write([]byte(logString))
 		if logFile != nil {
-			logFile.WriteString(id + " " + v)
+			logFile.WriteString(logString)
 		}
 	}
 	if isErr {
@@ -27,7 +29,7 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File, id str
 	}
 }
 
-//LogServerRequest creates a summary of the http connection information and send it to the connected logger
+//LogServerRequest creates a summary of the http connection information and send it to the connected logger.
 //if a logfile is provided it will also write the log messages to a log file
 func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string, logFile *os.File, id string) {
 	method := r.Method
@@ -35,7 +37,7 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string,
 	httpVer := r.Proto
 	host := r.Host
 	address := r.RemoteAddr
-	reqData := fmt.Sprintf("%s [%s] %s %s %s %s", address, time.Now().Format("Jan 2 2006 15:04:05 MST"), method, url, httpVer, host)
+	reqData := fmt.Sprintf("%s %s %s %s %s", address, method, url, httpVer, host)
 	SendLog(loggerAddr, false, []string{reqData}, logFile, id)
 }
 
@@ -76,13 +78,12 @@ func CreateLogServerAndListen(address string, logFile *os.File) {
 	}
 }
 
-//OpenLogFile opens the log file stored in path
+//OpenLogFile opens the log file stored in path.
 //If the file doesn't exist it is created
 func OpenLogFile(path string) *os.File {
 	date := time.Now().Format("2006-01-02")
 	filename := fmt.Sprintf("%s/%s.txt", path, date)
 	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE, 0666)
-	defer logFile.Close()
 	if err != nil {
 		log.Fatalln(err)
 	}

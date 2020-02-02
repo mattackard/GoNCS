@@ -12,5 +12,6 @@ var fullAddress = logAddress + ":" + logPort
 
 func main() {
 	logFile := logutil.OpenLogFile("./logs/")
+	defer logFile.Close()
 	logutil.CreateLogServerAndListen(fullAddress, logFile)
 }

@@ -24,7 +24,11 @@ var serverAddr = "http://" + serverName + ":" + serverPort
 //holds the user and pass used to identify requests from the proxy
 var proxyAuth = os.Getenv("PROXYAUTH")
 
+var logFile *os.File
+
 func main() {
+	logFile = logutil.OpenLogFile("./logs/")
+	defer logFile.Close()
 	http.HandleFunc("/", redirectHandler)
 	log.Fatalln(http.ListenAndServe(":"+proxyPort, nil))
 }

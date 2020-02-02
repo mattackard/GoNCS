@@ -17,13 +17,11 @@ var dnsPort = os.Getenv("DNSPORT")
 var logPort = os.Getenv("LOGPORT")
 var logName = os.Getenv("LOGGERNAME")
 var loggerAddr = logName + ":" + logPort
-var logFile *os.File
-
-func init() {
-	logFile = logutil.OpenLogFile("./logs/")
-}
 
 func main() {
+
+	logFile := logutil.OpenLogFile("./logs/")
+	defer logFile.Close()
 	l, err := net.Listen("tcp", dnsPort)
 	log.Printf("DNS is listening at %s\n", dnsPort)
 	if err != nil {
