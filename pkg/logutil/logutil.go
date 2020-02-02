@@ -15,10 +15,13 @@ import (
 //If a log file is given it will write the data to the log file
 func SendLog(address string, isErr bool, data []string, logFile *os.File, id string) {
 	conn, err := net.Dial("tcp", address)
-	defer conn.Close()
+	if conn != nil {
+		defer conn.Close()
+	}
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	for _, v := range data {
 		logString := fmt.Sprintf("%s [%s] %s", id, time.Now().Format("Jan 2 2006 15:04:05 MST"), v)
 		conn.Write([]byte(logString))

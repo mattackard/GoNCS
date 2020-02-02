@@ -9,7 +9,9 @@ import (
 //Ping send a ping to the DNS so it can record your service and IP
 func Ping(address string, serviceName string) net.Addr {
 	conn, err := net.Dial("tcp", address)
-	defer conn.Close()
+	if conn != nil {
+		defer conn.Close()
+	}
 	if err != nil {
 		log.Fatalln(err)
 	}
