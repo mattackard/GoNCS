@@ -1,6 +1,7 @@
 package logutil
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
@@ -76,9 +77,10 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
 
-		//write the contents of buffer to the log file
-		bufferText := string(buffer)
+		//trim te null characters from the buffer and convert to string
+		bufferText := string(bytes.Trim(buffer, "\x00"))
 		fmt.Println(bufferText)
+		//write the contents of buffer to the log file
 		WriteToLog(logFile, []string{bufferText})
 
 		go func(c net.Conn) {
