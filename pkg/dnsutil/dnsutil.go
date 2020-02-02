@@ -13,11 +13,12 @@ func Ping(address string, serviceName string) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	message := fmt.Sprintf("%s:%s", serviceName, getMyIP())
-	conn.Write([]byte(message))
+	fmt.Fprintf(conn, serviceName)
 }
 
-func getMyIP() string {
+//GetMyIP returns the caller's ip address by sending a blank request to google's DNS server
+//and retrieving the local address from the response
+func GetMyIP() string {
 	conn, err := net.Dial("UDP", "8.8.8.8:80")
 	if err != nil {
 		log.Fatalln(err)

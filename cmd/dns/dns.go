@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 	"os"
-	"strings"
 
+	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
 )
 
@@ -22,12 +22,16 @@ func main() {
 
 	logFile := logutil.OpenLogFile("./logs/")
 	defer logFile.Close()
+
 	l, err := net.Listen("tcp", ":"+dnsPort)
-	log.Printf("DNS is listening at %s\n", dnsPort)
 	if err != nil {
 		logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "DNS")
 	}
 	defer l.Close()
+
+	//send messages to log file to record startup
+	dnsIP := dnsutil.GetMyIP()
+	logutil.SendLog(loggerAddr, false, []string{"DNS Server started at " + dnsIP}, logFile, "DNS")
 
 	//wait for a connection
 	for {
@@ -37,10 +41,12 @@ func main() {
 		}
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
-		bufferText := string(buffer) + "\n"
-		serviceInfo := strings.Split(bufferText, ":")
-		fmt.Print(serviceInfo)
-		DNS[serviceInfo[0]] = serviceInfo[1]
+
+		//read the service name sent and assign it using it's IP in the dns's map
+		bufferText := string(buffer)
+		fmt.Println(bufferText, conn.LocalAddr().String())
+		DNS[bufferText] = conn.LocalAddr().String()
+		logutil.WriteToLog(logFile, []string{bufferText + " started at " + DNS[bufferText]})
 		go func(c net.Conn) {
 			c.Write(buffer)
 			c.Close()

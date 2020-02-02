@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 
+	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
 )
 
@@ -18,6 +19,8 @@ var logPort = os.Getenv("LOGPORT")
 var logName = os.Getenv("LOGGERNAME")
 var serverPort = os.Getenv("SERVERPORT")
 var serverName = os.Getenv("SERVERNAME")
+var dnsPort = os.Getenv("DNSPORT")
+var dnsName = os.Getenv("DNSNAME")
 var loggerAddr = logName + ":" + logPort
 var serverAddr = "http://" + serverName + ":" + serverPort
 
@@ -30,6 +33,13 @@ func main() {
 	logFile = logutil.OpenLogFile("./logs")
 	defer logFile.Close()
 	http.HandleFunc("/", redirectHandler)
+
+	//send messages to log file and terminal to record startup
+	proxyIP := dnsutil.GetMyIP()
+	dnsutil.Ping(dnsName+":"+dnsPort, "reverseproxy")
+	logutil.SendLog(loggerAddr, false, []string{"Reverse Proxy Server started at " + proxyIP}, logFile, "ReverseProxy")
+
+	//start server
 	log.Fatalln(http.ListenAndServe(":"+proxyPort, nil))
 }
 

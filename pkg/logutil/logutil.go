@@ -22,7 +22,7 @@ func SendLog(address string, isErr bool, data []string, logFile *os.File, id str
 		logString := fmt.Sprintf("%s [%s] %s", id, time.Now().Format("Jan 2 2006 15:04:05 MST"), v)
 		conn.Write([]byte(logString))
 		if logFile != nil {
-			WriteToLog([]string{logString}, logFile)
+			WriteToLog(logFile, []string{logString})
 		}
 	}
 	if isErr {
@@ -43,12 +43,9 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string,
 }
 
 //WriteToLog writes the data passed into data to the given file
-func WriteToLog(data []string, file *os.File) {
+func WriteToLog(file *os.File, data []string) {
 	for _, v := range data {
-		//prepare string for writing to file
-		v = strings.ToValidUTF8(v, "")
-
-		_, err := file.Write([]byte(v))
+		_, err := fmt.Fprintln(file, v)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -66,7 +63,8 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 		log.Fatal(err)
 	}
 
-	log.Printf("Logger is listening at %s\n", address)
+	log.Printf("Logger is listening at %s\n", port)
+	WriteToLog(logFile, []string{"Logger started at " + address + ":" + port})
 	defer l.Close()
 
 	//wait for a connection
@@ -79,9 +77,9 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 		conn.Read(buffer)
 
 		//write the contents of buffer to the log file
-		bufferText := string(buffer) + "\n"
-		fmt.Print(bufferText)
-		WriteToLog([]string{bufferText}, logFile)
+		bufferText := string(buffer)
+		fmt.Println(bufferText)
+		WriteToLog(logFile, []string{bufferText})
 
 		go func(c net.Conn) {
 			c.Write(buffer)
