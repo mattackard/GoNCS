@@ -35,9 +35,8 @@ func main() {
 	http.HandleFunc("/", redirectHandler)
 
 	//send messages to log file and terminal to record startup
-	proxyIP := dnsutil.GetMyIP()
-	dnsutil.Ping(dnsName+":"+dnsPort, "reverseproxy")
-	logutil.SendLog(loggerAddr, false, []string{"Reverse Proxy Server started at " + proxyIP}, logFile, "ReverseProxy")
+	proxyIP := dnsutil.Ping(dnsName+":"+dnsPort, "reverseproxy")
+	logutil.SendLog(loggerAddr, false, []string{"Reverse Proxy Server started at " + proxyIP.String()}, logFile, "ReverseProxy")
 
 	//start server
 	log.Fatalln(http.ListenAndServe(":"+proxyPort, nil))

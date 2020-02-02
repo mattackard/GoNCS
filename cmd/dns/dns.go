@@ -31,7 +31,7 @@ func main() {
 
 	//send messages to log file to record startup
 	dnsIP := dnsutil.GetMyIP()
-	logutil.SendLog(loggerAddr, false, []string{"DNS Server started at " + dnsIP}, logFile, "DNS")
+	logutil.SendLog(loggerAddr, false, []string{"DNS Server started at " + dnsIP.String()}, logFile, "DNS")
 
 	//wait for a connection
 	for {
