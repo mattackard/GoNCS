@@ -27,21 +27,21 @@ var proxyAuth = os.Getenv("PROXYAUTH")
 var logFile *os.File
 
 func main() {
-	logFile = logutil.OpenLogFile("./logs/")
+	logFile = logutil.OpenLogFile("./logs")
 	defer logFile.Close()
 	http.HandleFunc("/", redirectHandler)
 	log.Fatalln(http.ListenAndServe(":"+proxyPort, nil))
 }
 
 func redirectHandler(w http.ResponseWriter, r *http.Request) {
-	logutil.LogServerRequest(w, r, loggerAddr, nil, "ReverseProxy")
+	logutil.LogServerRequest(w, r, loggerAddr, logFile, "ReverseProxy")
 	myURL := parseURL(serverAddr)
 	forwardHeaders(r, myURL)
 
 	//makes the request to the actual server
 	response, err := http.DefaultClient.Do(r)
 	if err != nil {
-		logutil.SendLog(loggerAddr, true, []string{err.Error(), "line 35"}, nil, "ReverseProxy")
+		logutil.SendLog(loggerAddr, true, []string{err.Error(), "line 35"}, logFile, "ReverseProxy")
 	}
 
 	//adds all response headers from server to response object being sent back to client
@@ -60,7 +60,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 func parseURL(target string) *url.URL {
 	parsed, err := url.Parse(target)
 	if err != nil {
-		logutil.SendLog(loggerAddr, true, []string{err.Error(), "line 54"}, nil, "ReverseProxy")
+		logutil.SendLog(loggerAddr, true, []string{err.Error(), "line 54"}, logFile, "ReverseProxy")
 	}
 	return parsed
 }
@@ -74,7 +74,7 @@ func forwardHeaders(r *http.Request, url *url.URL) {
 	//gets request's remote address without port number and sets it in forwarding header
 	split, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
-		logutil.SendLog(loggerAddr, true, []string{err.Error(), "line 68"}, nil, "ReverseProxy")
+		logutil.SendLog(loggerAddr, true, []string{err.Error(), "line 68"}, logFile, "ReverseProxy")
 	}
 	r.Header.Set("X-Forwarded-For", split)
 
