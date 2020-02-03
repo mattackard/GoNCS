@@ -2,10 +2,10 @@
 Protect your Project 0! Develop your own networking programs to watch, modify, and route network traffic to your HTTP server apps. Functions may be implemented as one application binary, or as several binaries.
 
 ## Functions
-- ~~Reverse Proxy
+- ~~Reverse Proxy~~
 - Firewall
 - Intrusion Detection System
-- ~~Logging Manager
+- ~~Logging Manager~~
 - Load Balancer
 
 ## Requirements
