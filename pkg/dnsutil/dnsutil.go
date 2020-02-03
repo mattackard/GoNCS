@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net"
+	"strings"
 )
 
 //Ping send a ping to the DNS so it can record your service and IP
@@ -57,4 +58,11 @@ func GetServiceIP(dnsAddr string, serviceName string) string {
 	//trim te null characters from the buffer and convert to string
 	bufferText := string(bytes.Trim(buffer, "\x00"))
 	return bufferText
+}
+
+//TrimPort converts an IP address into a string containing the IP without the port attached
+func TrimPort(ip net.Addr) string {
+	stringIP := ip.String()
+	noPort := strings.Split(stringIP, ":")[0]
+	return noPort
 }
