@@ -42,7 +42,7 @@ func LogServerRequest(w http.ResponseWriter, r *http.Request, loggerAddr string,
 	url := r.URL
 	httpVer := r.Proto
 	host := r.Host
-	address := r.RemoteAddr
+	address := strings.Split(r.RemoteAddr, ":")[0]
 	reqData := fmt.Sprintf("%s %s %s %s %s", address, method, url, httpVer, host)
 	SendLog(loggerAddr, false, []string{reqData}, logFile, id)
 }
