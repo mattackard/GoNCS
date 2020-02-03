@@ -18,7 +18,7 @@ func Ping(address string, serviceName string) net.Addr {
 		}
 	}
 	defer conn.Close()
-	fmt.Fprintf(conn, serviceName)
+	fmt.Fprintf(conn, "recordAddress="+serviceName)
 	ip := conn.LocalAddr()
 	return ip
 }
@@ -50,7 +50,7 @@ func GetServiceIP(dnsAddr string, serviceName string) string {
 		}
 	}
 	defer conn.Close()
-	conn.Write([]byte(serviceName))
+	fmt.Fprint(conn, "getAddress="+serviceName)
 
 	buffer := make([]byte, 1024)
 	conn.Read(buffer)
