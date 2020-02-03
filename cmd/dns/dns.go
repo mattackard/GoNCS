@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net"
@@ -43,10 +44,10 @@ func main() {
 		conn.Read(buffer)
 
 		//read the service name sent and assign it using it's IP in the dns's map
-		bufferText := string(buffer)
-		fmt.Println(bufferText, conn.LocalAddr().String())
-		DNS[bufferText] = conn.LocalAddr().String()
-		logutil.WriteToLog(logFile, []string{bufferText + " started at " + DNS[bufferText]})
+		bufferText := string(bytes.Trim(buffer, "\x00"))
+		fmt.Println(bufferText, conn.RemoteAddr().String())
+		DNS[bufferText] = conn.RemoteAddr().String()
+		logutil.WriteToLog(logFile, "DNS", []string{bufferText + " started at " + DNS[bufferText]})
 		go func(c net.Conn) {
 			c.Write(buffer)
 			c.Close()
