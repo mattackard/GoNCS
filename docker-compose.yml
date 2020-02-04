@@ -49,3 +49,19 @@ services:
       - dns
       - logger
       - noteserver
+
+  dashboard:
+    image: dashboard
+    volumes: 
+      - /home/ubuntu/Desktop/logs/dashboard:/logs
+    build:
+      context: ./cmd/dashboard/
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    env_file: .env
+    depends_on: 
+      - dns
+      - logger
+      - noteserver
+      - reverseproxy
