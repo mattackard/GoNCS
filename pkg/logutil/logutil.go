@@ -79,7 +79,6 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		defer conn.Close()
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
 
@@ -106,10 +105,14 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 
 			//send response
 			conn.Write(bigBuffer)
+			conn.Close()
 		} else {
 			//write the contents of buffer to the log file
 			WriteToLog(logFile, conn.RemoteAddr().String(), []string{bufferText})
-			conn.Write(buffer)
+			go func(c net.Conn) {
+				c.Write(buffer)
+				c.Close()
+			}(conn)
 		}
 
 	}
