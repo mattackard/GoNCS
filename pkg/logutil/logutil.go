@@ -88,7 +88,6 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 
 		//if the connection is requesting thelatest log entries, send them
 		if strings.Contains(bufferText, "sendLog") {
-			fmt.Println(bufferText)
 
 			//get the length of the log file and then subtract the length of the
 			//buffer so only one response is needed
