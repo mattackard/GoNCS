@@ -88,6 +88,9 @@ func GetServiceIP(dnsAddr string, serviceName string) string {
 
 	//trim te null characters from the buffer and convert to string
 	bufferText := string(bytes.Trim(buffer, "\x00"))
+
+	//remove the "servicename=" and leave just the IP
+	bufferText = strings.Split(bufferText, "=")[1]
 	return bufferText
 }
 
