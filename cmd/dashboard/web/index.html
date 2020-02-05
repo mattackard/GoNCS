@@ -8,8 +8,29 @@
         <header>
             <h1>Hello World</h1>
         </header>
-        <div>
-            <p>Some text</p>
+        <div id="metricsContainer">
+            <ul>
+                <li class="serviceContainer">
+                    <h3 class="serviceTitle">Reverse Proxy</h3>
+                    <ul class="serviceInfo">
+                        <li>cpu usage</li>
+                        <li>memory usage</li>
+                        <li>process info</li>
+                        <li>current connection count</li>
+                        <li>cpu info</li>
+                        <li>duration info</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div id="logContainer">
+            <ul id="logFilterContainer">
+                <input class="logFilter" type="checkbox" value="some value">
+                <input class="logFilter" type="checkbox" value="some value">
+                <input class="logFilter" type="checkbox" value="some value">
+                <input class="logFilter" type="checkbox" value="some value">
+            </ul>
+            <textarea readonly id="logDisplay"></textarea>
         </div>
         <script src="index.js"></script>
     </body>
