@@ -79,19 +79,40 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 		if err != nil {
 			log.Fatal(err)
 		}
+		defer conn.Close()
 		buffer := make([]byte, 1024)
 		conn.Read(buffer)
 
 		//trim te null characters from the buffer and convert to string
 		bufferText := string(bytes.Trim(buffer, "\x00"))
-		fmt.Println(bufferText)
-		//write the contents of buffer to the log file
-		WriteToLog(logFile, conn.RemoteAddr().String(), []string{bufferText})
 
-		go func(c net.Conn) {
-			c.Write(buffer)
-			c.Close()
-		}(conn)
+		//if the connection is requesting thelatest log entries, send them
+		if strings.Contains(bufferText, "sendLog") {
+			fmt.Println(bufferText)
+
+			//get the length of the log file and then subtract the length of the
+			//buffer so only one response is needed
+			stats, err := os.Stat(logFile.Name())
+			if err != nil {
+				WriteToLog(logFile, "Logger", []string{err.Error()})
+			}
+			bigBuffer := make([]byte, 16384)
+			startPoint := stats.Size() - 16384
+
+			//read from the end of the file to get the most recent logs
+			_, err = logFile.ReadAt(bigBuffer, startPoint)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			//send response
+			conn.Write(bigBuffer)
+		} else {
+			//write the contents of buffer to the log file
+			WriteToLog(logFile, conn.RemoteAddr().String(), []string{bufferText})
+			conn.Write(buffer)
+		}
+
 	}
 }
 
@@ -105,7 +126,7 @@ func OpenLogFile(path string) *os.File {
 	date := time.Now().Format("2006-01-02")
 	filename := fmt.Sprintf("%s%s.txt", path, date)
 	//opens file with options to append string on write, and open in write only mode
-	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	logFile, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0666)
 	if err != nil {
 		log.Fatalln(err)
 	}
