@@ -2,10 +2,16 @@ package dnsutil
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net"
 	"strings"
 )
+
+//DNS holds the addresses of all currently running services as an array of [name, address]
+type DNS struct {
+	Services map[string]string `json:"services"`
+}
 
 //Ping send a ping to the DNS so it can record your service and IP
 func Ping(address string, serviceName string) net.Addr {
@@ -21,6 +27,31 @@ func Ping(address string, serviceName string) net.Addr {
 	fmt.Fprintf(conn, "recordAddress="+serviceName)
 	ip := conn.LocalAddr()
 	return ip
+}
+
+//GetServiceAddresses return an array of string
+func GetServiceAddresses(dnsAddr string) DNS {
+	var conn net.Conn
+	var err error
+
+	//wait for a successful connection
+	for {
+		conn, err = net.Dial("tcp", dnsAddr)
+		if err == nil {
+			break
+		}
+	}
+	defer conn.Close()
+
+	//make a request for all DNS addresses and place response into a buffer
+	conn.Write([]byte("getAllAddresses"))
+	buffer := make([]byte, 1024)
+	conn.Read(buffer)
+
+	//unmarshal the json back into a DNS struct and return
+	var response DNS
+	json.Unmarshal(buffer, &response)
+	return response
 }
 
 //GetMyIP returns the caller's ip address by sending a blank request to google's DNS server
