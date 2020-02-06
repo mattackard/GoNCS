@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net"
 	"strings"
 )
@@ -48,9 +49,15 @@ func GetServiceAddresses(dnsAddr string) DNS {
 	buffer := make([]byte, 1024)
 	conn.Read(buffer)
 
+	//trim any extra nil bytes
+	buffer = bytes.Trim(buffer, "\x00")
+
 	//unmarshal the json back into a DNS struct and return
 	var response DNS
-	json.Unmarshal(buffer, &response)
+	err = json.Unmarshal(buffer, &response)
+	if err != nil {
+		log.Fatal(err)
+	}
 	return response
 }
 
