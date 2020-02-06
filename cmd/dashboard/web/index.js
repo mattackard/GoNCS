@@ -20,6 +20,7 @@ let logTitle = `${date.getFullYear()}-${month}-${day}.txt`;
 //tell the go server to get the master log and record it into the file
 setInterval(() => {
     fetch("http://localhost:80/getLogs").then(response => response.text()).then(text => {
+        logDisplay.scrollTop = logDisplay.scrollHeight;
         logDisplay.value = text;
     });
 }, requestInterval);
@@ -28,6 +29,13 @@ setInterval(() => {
 setInterval(() => {
     fetch("http://localhost:80/stats").then(response => response.json()).then(json => {
         let html = "";
+        json.containers.sort((a,b) => {
+            if (a.serviceName > b.serviceName) {
+                return 1;
+            } else {
+                return -1;
+            }
+        })
         json.containers.forEach(service => {
             html += createStatListItem(service);
         });
@@ -40,11 +48,11 @@ function createStatListItem(serviceStats) {
                     <h3 class="serviceTitle">${serviceStats.serviceName}</h3>
                     <h3 class="ipAddress">IP: ${serviceStats.ip}</h3>
                     <ul class="serviceInfo">
-                        <li>CPU Usage ${serviceStats.cpuShare}</li>
-                        <li>CPU User Time ${serviceStats.cpuUserTime}</li>
-                        <li>CPU System Time ${serviceStats.cpuSysTime}</li>
-                        <li>Available Memory ${serviceStats.availableMem}</li>
-                        <li>Memory Use ${serviceStats.memUsage}</li>
+                        <li>CPU Shares ${serviceStats.cpuShare}</li>
+                        <li>CPU User Time ${(serviceStats.cpuUserTime/1000000).toFixed(2)}ms</li>
+                        <li>CPU System Time ${(serviceStats.cpuSysTime/1000000).toFixed(2)}ms</li>
+                        <li>Available Memory ${(serviceStats.availableMem/1000000).toFixed(0)}mb</li>
+                        <li>Memory Use ${(serviceStats.memUsage/serviceStats.availableMem*100).toFixed(2)}%</li>
                         <li>Open Files ${serviceStats.openFiles}</li>
                         <li>Thread Count ${serviceStats.threadCount}</li>
                     </ul>
