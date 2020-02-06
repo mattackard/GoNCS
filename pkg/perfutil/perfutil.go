@@ -2,7 +2,9 @@
 package perfutil
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -39,7 +41,7 @@ func GetServerStats() Service {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	dashboardStats := Service{
+	containerStats := Service{
 		"Dashboard",
 		dnsutil.TrimPort(dnsutil.GetMyIP()),
 		myStats.CPU.Shares,
@@ -50,20 +52,28 @@ func GetServerStats() Service {
 		myStats.Files.Open,
 		myStats.Threads.Num,
 	}
-	return dashboardStats
+	return containerStats
 }
 
 //RequestStatsHTTP makes an HTTP request to requestAddr/getStats and puts the response into a service struct
 func RequestStatsHTTP(requestAddr string) Service {
-	resp, err := http.Get(requestAddr + "/getStats")
+	resp, err := http.Get("http://" + requestAddr + "/getStats")
+	if err != nil {
+		log.Fatalln(err)
+	}
 	var stats Service
+	fmt.Println(resp)
 
 	body, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	json.Unmarshal(body, &stats)
+
+	err = json.Unmarshal(body, &stats)
+	if err != nil {
+		log.Fatalln(err)
+	}
 	return stats
 }
 
@@ -83,6 +93,9 @@ func RequestStatsTCP(requestAddr string) Service {
 
 	buffer := make([]byte, 1024)
 	conn.Read(buffer)
+
+	//trim any extra nil bytes
+	buffer = bytes.Trim(buffer, "\x00")
 
 	err = json.Unmarshal(buffer, &stats)
 	if err != nil {
