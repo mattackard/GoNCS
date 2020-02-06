@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
@@ -9,31 +10,18 @@ import (
 
 	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
-
-	"github.com/segmentio/stats/procstats"
+	"github.com/mattackard/project-1/pkg/perfutil"
 )
 
-//ContainerStats holds the array of service structs containing service runtime stats
-type ContainerStats struct {
-	Containers []Service `json:"containers"`
-}
-
-//Service contains the runtime stats for a process
-type Service struct {
-	ServiceName string
-	CPUShare    string
-	CPUUserTime string
-	CPUSysTime  string
-}
-
-var dnsAddr string
+var dnsAddr = "dns:6060"
 var logAddr = "logger:6060"
 var logFile *os.File
 
 func main() {
 	logFile = logutil.OpenLogFile("/logs")
+	logAddr = dnsutil.GetServiceIP(dnsAddr, "logger")
 
-	myIP := dnsutil.Ping("dns:6060", "dashboard")
+	myIP := dnsutil.Ping(dnsAddr, "dashboard")
 	noPort := dnsutil.TrimPort(myIP)
 
 	//file server for html file
@@ -41,7 +29,7 @@ func main() {
 	http.Handle("/dashboard/", http.StripPrefix("/dashboard/", fs))
 
 	//endpoints for javascript requests
-	http.HandleFunc("/stats", serverStats)
+	http.HandleFunc("/stats", getAllStats)
 	http.HandleFunc("/getLogs", getMasterLog)
 
 	logutil.SendLog(logAddr, false, []string{"Dashboard started at " + noPort}, logFile, "Dashboard")
@@ -55,13 +43,35 @@ func setHeaders(w http.ResponseWriter) http.ResponseWriter {
 	return w
 }
 
-func serverStats(w http.ResponseWriter, r *http.Request) {
-	w = setHeaders(w)
-	myStats, err := procstats.CollectProcInfo(os.Getpid())
+// //gets all stats from all online services and send the data to the dashboard client
+func getAllStats(w http.ResponseWriter, r *http.Request) {
+
+	//create container instance for stats
+	var containerStats perfutil.ContainerStats
+
+	//get all currently running container IPs from dns
+	addresses := dnsutil.GetServiceAddresses(dnsAddr)
+	fmt.Println(addresses)
+
+	//for each address, send a request for stats and append to containerStats
+	for _, v := range addresses.Services {
+		fmt.Println(v)
+		thisService := perfutil.RequestStatsHTTP(v)
+		containerStats.Containers = append(containerStats.Containers, thisService)
+	}
+
+	//append the local container stats for the dashboard last
+	containerStats.Containers = append(containerStats.Containers, perfutil.GetServerStats())
+
+	//marshal containerStats into a byte stream to be recieved by the client as json
+	bytes, err := json.Marshal(containerStats)
 	if err != nil {
 		logutil.SendLog(logAddr, true, []string{err.Error()}, logFile, "Dashboard")
 	}
-	fmt.Fprint(w, myStats)
+
+	w = setHeaders(w)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bytes)
 }
 
 func getMasterLog(w http.ResponseWriter, r *http.Request) {

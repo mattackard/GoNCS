@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/mattackard/project-1/pkg/dnsutil"
+
 	"github.com/segmentio/stats/procstats"
 )
 
@@ -19,6 +21,7 @@ type ContainerStats struct {
 //Service contains the runtime stats for a process
 type Service struct {
 	ServiceName  string        `json:"serviceName"`
+	IP           string        `json:"ip"`
 	CPUShare     int64         `json:"cpuShare"`
 	CPUUserTime  time.Duration `json:"cpuUserTime"`
 	CPUSysTime   time.Duration `json:"cpuSysTime"`
@@ -26,19 +29,17 @@ type Service struct {
 	MemUsage     uint64        `json:"memUsage"`
 	OpenFiles    uint64        `json:"openFiles"`
 	ThreadCount  uint64        `json:"threadCount"`
-	CPUDelay     time.Duration `json:"cpuDelay"`
-	BlockIODelay time.Duration `json:"blockIODelay"`
 }
 
 //GetServerStats returns a Serivce struct containing the stats of the container calling the function
 func GetServerStats() Service {
 	myStats, err := procstats.CollectProcInfo(os.Getpid())
-	myDelay, err := procstats.CollectDelayInfo(os.Getegid())
 	if err != nil {
 		log.Fatalln(err)
 	}
 	dashboardStats := Service{
 		"Dashboard",
+		dnsutil.TrimPort(dnsutil.GetMyIP()),
 		myStats.CPU.Shares,
 		myStats.CPU.User,
 		myStats.CPU.Sys,
@@ -46,8 +47,6 @@ func GetServerStats() Service {
 		myStats.Memory.Size,
 		myStats.Files.Open,
 		myStats.Threads.Num,
-		myDelay.CPUDelay,
-		myDelay.BlockIODelay,
 	}
 	return dashboardStats
 }
