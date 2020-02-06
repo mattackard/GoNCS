@@ -36,7 +36,7 @@ setInterval(() => {
 }, requestInterval);
 
 function createStatListItem(serviceStats) {
-    let html = `<li>
+    let html = `<li class="serviceCard">
                     <h3 class="serviceTitle">${serviceStats.serviceName}</h3>
                     <h3 class="ipAddress">IP: ${serviceStats.ip}</h3>
                     <ul class="serviceInfo">

@@ -3,33 +3,38 @@
     <head>
         <title>Server Dashboard</title>
         <link rel="stylesheet" href="index.css">
+        <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet"> 
     </head>
     <body>
         <header>
-            <h1>Hello World</h1>
+            <h1>Network Container Dashboard</h1>
         </header>
         <div id="metricsContainer">
+            <h2>Currently Running Containers</h2>
             <ul id="serviceUL">
-                <li class="serviceContainer">
-                    <h3 class="serviceTitle">Reverse Proxy</h3>
-                    <ul class="serviceInfo">
-                        <li>cpu usage</li>
-                        <li>memory usage</li>
-                        <li>process info</li>
-                        <li>current connection count</li>
-                        <li>cpu info</li>
-                        <li>duration info</li>
-                    </ul>
-                </li>
+                <div id="spacer"><p>Loading Container Data . . .</p></div>
             </ul>
         </div>
         <div id="logContainer">
-            <ul id="logFilterContainer">
-                <input class="logFilter" type="checkbox" value="some value">
-                <input class="logFilter" type="checkbox" value="some value">
-                <input class="logFilter" type="checkbox" value="some value">
-                <input class="logFilter" type="checkbox" value="some value">
-            </ul>
+            <h2>Logging Output</h2>
+            <!-- <ul id="logFilterContainer">
+                <li>
+                    <label for="box1">Box 1</label>
+                    <input class="logFilter" type="checkbox" id="box1">
+                </li>
+                <li>
+                    <label for="box2">Box 2</label>
+                    <input class="logFilter" type="checkbox" id="box2">
+                </li>
+                <li>
+                    <label for="box3">Box 3</label>
+                    <input class="logFilter" type="checkbox" id="box3">
+                </li>
+                <li>
+                    <label for="box4">Box 4</label>
+                    <input class="logFilter" type="checkbox" id="box4">
+                </li>
+            </ul> -->
             <textarea readonly id="logDisplay"></textarea>
         </div>
         <script src="index.js"></script>

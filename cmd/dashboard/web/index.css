@@ -1,3 +1,112 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: rgb(228, 249, 255);
+    color: rgb(24, 24, 24);
+}
+
 h1 {
-    color: green
+    text-align: center;
+    margin-top: 2rem;
+    color: rgb(104, 30, 30);
+}
+
+#metricsContainer h2 {
+    text-align: center;
+    margin: 1rem 0 2rem;
+    color: rgb(104, 30, 30);
+}
+
+#metricsContainer {
+    border: 1px solid black;
+    background-color: rgb(216, 216, 216);
+    box-shadow: 0 1px 5px black;
+    clip-path: inset(-5px -5px 0 -5px);
+    margin: 2em 5% 0;
+    padding: 1em 5% 3em;
+}
+
+#serviceUL {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    
+}
+
+.serviceCard {
+    padding: 2em 1em;
+    margin: 0.4em;
+    border: 2px solid black;
+    background-color: white;
+    box-shadow: 0 5px 5px black;
+}
+
+.serviceInfo {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 0.8rem;
+    margin: 2em 0 1em;
+    line-height: 1.6;
+}
+
+#logContainer {
+    margin: 0 5%;
+    padding: 0 5%;
+    border: 1px solid black;
+    box-shadow: 0 1px 6px black;
+    clip-path: inset(0 -5px -5px -5px);
+    background-color: rgb(216, 216, 216);
+}
+
+#logContainer h2 {
+    text-align: center;
+    margin: 2rem 0 1rem;
+    color: rgb(104, 30, 30);
+}
+
+#logFilterContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    list-style: none;
+    padding-top: 2em;
+}
+
+#logFilterContainer li {
+    padding: 1em 2em ;
+    background-color: rgb(228, 249, 255);
+    border: 1px solid rgb(0, 0, 0);
+    border-radius: 0.7em 0.7em 0 0;
+}
+
+#logDisplay {
+    width: 100%;
+    height: 70vh;
+    margin-bottom: 4em;
+    background-color: white;
+    border-bottom: 1px solid black;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    padding: 1em;
+    line-height: 1.7;
+}
+
+#spacer {
+    width: 100%;
+    height: 30vh;
+}
+
+#spacer p {
+    display: block;
+    position: absolute;
+    right: 40vw;
+    top: 26vh;
+    font-size: 1.3em;
+    margin: 15vh 0;
 }
