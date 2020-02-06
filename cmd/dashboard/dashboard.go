@@ -51,7 +51,6 @@ func getAllStats(w http.ResponseWriter, r *http.Request) {
 
 	//get all currently running container IPs from dns
 	addresses := dnsutil.GetServiceAddresses(dnsAddr)
-	fmt.Println(addresses)
 
 	//for each address, send a request for stats and append to containerStats
 	for _, v := range addresses.Services {
