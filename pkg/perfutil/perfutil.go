@@ -3,6 +3,7 @@ package perfutil
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -55,13 +56,14 @@ func GetServerStats() Service {
 //RequestStatsHTTP makes an HTTP request to requestAddr/getStats and puts the response into a service struct
 func RequestStatsHTTP(requestAddr string) Service {
 	resp, err := http.Get(requestAddr + "/getStats")
-	buffer := make([]byte, 1024)
 	var stats Service
-	_, err = resp.Body.Read(buffer)
+
+	body, err := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	json.Unmarshal(buffer, &stats)
+	json.Unmarshal(body, &stats)
 	return stats
 }
 
