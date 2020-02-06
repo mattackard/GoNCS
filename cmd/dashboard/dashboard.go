@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
@@ -53,14 +54,19 @@ func getAllStats(w http.ResponseWriter, r *http.Request) {
 	addresses := dnsutil.GetServiceAddresses(dnsAddr)
 
 	//for each address, send a request for stats and append to containerStats
-	for _, v := range addresses.Services {
-		fmt.Println(v)
-		thisService := perfutil.RequestStatsHTTP(v)
+	for k, v := range addresses.Services {
+		var thisService perfutil.Service
+		if k == "logger" || k == "DNS" {
+			thisService = perfutil.RequestStatsTCP(v)
+			thisService.ServiceName = strings.Title(k)
+		} else if k == "dashboard" {
+			thisService = perfutil.GetServerStats()
+		} else {
+			thisService = perfutil.RequestStatsHTTP(v)
+			thisService.ServiceName = strings.Title(k)
+		}
 		containerStats.Containers = append(containerStats.Containers, thisService)
 	}
-
-	//append the local container stats for the dashboard last
-	containerStats.Containers = append(containerStats.Containers, perfutil.GetServerStats())
 
 	//marshal containerStats into a byte stream to be recieved by the client as json
 	bytes, err := json.Marshal(containerStats)

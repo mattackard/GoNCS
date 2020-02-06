@@ -10,6 +10,7 @@ import (
 
 	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
+	"github.com/mattackard/project-1/pkg/perfutil"
 )
 
 //PORT holds the port number services that communicate with the proxy
@@ -39,6 +40,9 @@ func main() {
 	//send all requests through the redirect handler
 	http.HandleFunc("/", redirectHandler)
 
+	//handler for sending performance stats
+	http.HandleFunc("/getStats", perfutil.SendStatsHTTP)
+
 	//send messages to log file and terminal to record startup
 	proxyIP := dnsutil.Ping(dnsAddr, "reverseproxy")
 	logutil.SendLog(loggerAddr, false, []string{"Reverse Proxy Server started at " + dnsutil.TrimPort(proxyIP) + ":" + proxyPort}, logFile, "ReverseProxy")
@@ -59,9 +63,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 
 	//makes the request to the actual server
 	response, err := http.DefaultClient.Do(r)
-	if err != nil {
-		logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "ReverseProxy")
-	}
+	genericErrHandler(err)
 
 	//adds all response headers from server to response object being sent back to client
 	for key, values := range response.Header {
@@ -78,9 +80,7 @@ func redirectHandler(w http.ResponseWriter, r *http.Request) {
 //converts a string URL into a *url.URL struct
 func parseURL(target string) *url.URL {
 	parsed, err := url.Parse(target)
-	if err != nil {
-		logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "ReverseProxy")
-	}
+	genericErrHandler(err)
 	return parsed
 }
 
@@ -94,12 +94,16 @@ func forwardHeaders(r *http.Request, url *url.URL) {
 
 	//gets request's remote address without port number and sets it in forwarding header
 	split, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "ReverseProxy")
-	}
+	genericErrHandler(err)
 	r.Header.Set("X-Forwarded-For", split)
 
 	//add user and pass for authenticating with the main server
 	auth := base64.StdEncoding.EncodeToString([]byte(proxyAuth))
 	r.Header.Set("Proxy-Authorization", "Basic "+auth)
+}
+
+func genericErrHandler(err error) {
+	if err != nil {
+		logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "ReverseProxy")
+	}
 }

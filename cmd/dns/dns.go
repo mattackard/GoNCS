@@ -10,6 +10,7 @@ import (
 
 	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
+	"github.com/mattackard/project-1/pkg/perfutil"
 )
 
 //DNS holds the name and ip address of each service that connects to it
@@ -25,8 +26,10 @@ func main() {
 	logFile := logutil.OpenLogFile("./logs/")
 	defer logFile.Close()
 
-	//initialize services map
+	//initialize services map and add dns to it
 	DNS.Services = make(map[string]string)
+	dnsIP := dnsutil.GetMyIP()
+	DNS.Services["DNS"] = dnsutil.TrimPort(dnsIP) + ":" + universalPort
 
 	//create tcp server
 	l, err := net.Listen("tcp", ":"+universalPort)
@@ -36,8 +39,7 @@ func main() {
 	defer l.Close()
 
 	//send messages to log file to record startup
-	dnsIP := dnsutil.GetMyIP()
-	logutil.SendLog(loggerAddr, false, []string{"DNS Server started at " + dnsutil.TrimPort(dnsIP) + ":" + universalPort}, logFile, "DNS")
+	logutil.SendLog(loggerAddr, false, []string{"DNS Server started at " + DNS.Services["DNS"]}, logFile, "DNS")
 
 	//wait for a connection
 	for {
@@ -80,6 +82,10 @@ func main() {
 				logutil.SendLog(loggerAddr, true, []string{err.Error()}, logFile, "DNS")
 			}
 			conn.Write(bytes)
+
+		} else if bufferSlice[0] == "containerStats" {
+			//send the dns process stats
+			perfutil.SendStatsTCP(conn)
 
 		} else {
 			//don't allow data without a subcommand
