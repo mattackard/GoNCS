@@ -4,7 +4,6 @@ package perfutil
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -62,7 +61,6 @@ func RequestStatsHTTP(requestAddr string) Service {
 		log.Fatalln(err)
 	}
 	var stats Service
-	fmt.Println(resp)
 
 	body, err := ioutil.ReadAll(resp.Body)
 	resp.Body.Close()
