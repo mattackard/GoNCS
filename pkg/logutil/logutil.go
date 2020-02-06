@@ -96,11 +96,14 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 			}
 			bigBuffer := make([]byte, 16384)
 			startPoint := stats.Size() - 16384
+			if startPoint < 0 {
+				startPoint = 0
+			}
 
 			//read from the end of the file to get the most recent logs
 			_, err = logFile.ReadAt(bigBuffer, startPoint)
 			if err != nil {
-				log.Fatal(err)
+				log.Print(err)
 			}
 
 			//send response
