@@ -9,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/mattackard/project-1/pkg/perfutil"
 )
 
 //SendLog sends the log message over tcp and throws an error if the log message is an error.
@@ -85,30 +87,14 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 		//trim te null characters from the buffer and convert to string
 		bufferText := string(bytes.Trim(buffer, "\x00"))
 
-		//if the connection is requesting thelatest log entries, send them
 		if strings.Contains(bufferText, "sendLog") {
+			//send the logger's log file's contents
+			sendLogHandler(conn, logFile)
 
-			//get the length of the log file and then subtract the length of the
-			//buffer so only one response is needed
-			stats, err := os.Stat(logFile.Name())
-			if err != nil {
-				WriteToLog(logFile, "Logger", []string{err.Error()})
-			}
-			bigBuffer := make([]byte, 16384)
-			startPoint := stats.Size() - 16384
-			if startPoint < 0 {
-				startPoint = 0
-			}
+		} else if strings.Contains(bufferText, "containerStats") {
+			//send the logger process performance stats
+			perfutil.SendStatsTCP(conn)
 
-			//read from the end of the file to get the most recent logs
-			_, err = logFile.ReadAt(bigBuffer, startPoint)
-			if err != nil {
-				log.Print(err)
-			}
-
-			//send response
-			conn.Write(bigBuffer)
-			conn.Close()
 		} else {
 			//write the contents of buffer to the log file
 			WriteToLog(logFile, conn.RemoteAddr().String(), []string{bufferText})
@@ -136,4 +122,30 @@ func OpenLogFile(path string) *os.File {
 		log.Fatalln(err)
 	}
 	return logFile
+}
+
+//TCP handler for sending the logger's log file over a TCP connection
+func sendLogHandler(conn net.Conn, logFile *os.File) {
+
+	//get the length of the log file and then subtract the length of the
+	//buffer so only one response is needed
+	stats, err := os.Stat(logFile.Name())
+	if err != nil {
+		WriteToLog(logFile, "Logger", []string{err.Error()})
+	}
+	bigBuffer := make([]byte, 16384)
+	startPoint := stats.Size() - 16384
+	if startPoint < 0 {
+		startPoint = 0
+	}
+
+	//read from the end of the file to get the most recent logs
+	_, err = logFile.ReadAt(bigBuffer, startPoint)
+	if err != nil {
+		log.Print(err)
+	}
+
+	//send response
+	conn.Write(bigBuffer)
+	conn.Close()
 }

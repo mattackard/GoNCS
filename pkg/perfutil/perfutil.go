@@ -4,6 +4,7 @@ package perfutil
 import (
 	"encoding/json"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -62,4 +63,49 @@ func RequestStatsHTTP(requestAddr string) Service {
 	}
 	json.Unmarshal(buffer, &stats)
 	return stats
+}
+
+//RequestStatsTCP makes a TCP call, asks for container stats, and records the response into a Service struct
+func RequestStatsTCP(requestAddr string) Service {
+	var conn net.Conn
+	var err error
+	var stats Service
+	for {
+		conn, err = net.Dial("tcp", requestAddr)
+		if err == nil {
+			break
+		}
+	}
+	defer conn.Close()
+	conn.Write([]byte("containerStats"))
+
+	buffer := make([]byte, 1024)
+	conn.Read(buffer)
+
+	err = json.Unmarshal(buffer, &stats)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return stats
+}
+
+//SendStatsHTTP is a generic http handler for getting the server's stats and sending them in the response
+func SendStatsHTTP(w http.ResponseWriter, r *http.Request) {
+	stats := GetServerStats()
+	response, err := json.Marshal(stats)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	w.Write(response)
+}
+
+//SendStatsTCP is a generic tcp handler for getting the server's stats and sending them back through the connection
+func SendStatsTCP(conn net.Conn) {
+	stats := GetServerStats()
+	response, err := json.Marshal(stats)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	conn.Write(response)
+	conn.Close()
 }
