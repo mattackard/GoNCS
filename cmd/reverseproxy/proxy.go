@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"github.com/mattackard/project-1/pkg/dnsutil"
 	"github.com/mattackard/project-1/pkg/logutil"
@@ -29,8 +28,8 @@ var logFile *os.File
 
 func init() {
 	//requests the address of services from the dns server
-	serverAddr = strings.Split(dnsutil.GetServiceIP(dnsAddr, "noteserver"), "=")[1]
-	loggerAddr = strings.Split(dnsutil.GetServiceIP(dnsAddr, "logger"), "=")[1]
+	serverAddr = dnsutil.GetServiceIP(dnsAddr, "noteserver")
+	loggerAddr = dnsutil.GetServiceIP(dnsAddr, "logger")
 }
 
 func main() {
