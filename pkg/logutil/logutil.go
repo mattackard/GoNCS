@@ -140,10 +140,7 @@ func sendLogHandler(conn net.Conn, logFile *os.File) {
 	}
 
 	//read from the end of the file to get the most recent logs
-	_, err = logFile.ReadAt(bigBuffer, startPoint)
-	if err != nil {
-		log.Print(err)
-	}
+	logFile.ReadAt(bigBuffer, startPoint)
 
 	//send response
 	conn.Write(bigBuffer)
