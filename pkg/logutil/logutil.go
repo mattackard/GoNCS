@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mattackard/project-1/pkg/dnsutil"
+
 	"github.com/mattackard/project-1/pkg/perfutil"
 )
 
@@ -97,7 +99,7 @@ func CreateLogServerAndListen(address string, port string, logFile *os.File) {
 
 		} else {
 			//write the contents of buffer to the log file
-			WriteToLog(logFile, conn.RemoteAddr().String(), []string{bufferText})
+			WriteToLog(logFile, dnsutil.TrimPort(conn.RemoteAddr()), []string{bufferText})
 			go func(c net.Conn) {
 				c.Write(buffer)
 				c.Close()
